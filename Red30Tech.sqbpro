@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/jacob.taylor2/Documents/Databases/Red30Tech/Red30Tech.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2357"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,21:mainConferenceSessionInfo"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="ConferenceSessionInfo" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="126"/><column index="2" value="126"/><column index="3" value="300"/><column index="4" value="300"/><column index="5" value="175"/><column index="6" value="86"/><column index="7" value="283"/><column index="8" value="101"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="ConventionAttendees" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="104"/><column index="2" value="77"/><column index="3" value="95"/><column index="4" value="216"/><column index="5" value="91"/><column index="6" value="172"/><column index="7" value="107"/><column index="8" value="115"/><column index="9" value="45"/><column index="10" value="57"/><column index="11" value="84"/><column index="12" value="62"/><column index="13" value="105"/><column index="14" value="79"/><column index="15" value="109"/><column index="17" value="92"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="EmployeeDirectory" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="67"/><column index="2" value="69"/><column index="3" value="191"/><column index="4" value="121"/><column index="5" value="163"/><column index="6" value="87"/><column index="7" value="77"/><column index="8" value="58"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Inventory" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="94"/><column index="2" value="81"/><column index="3" value="198"/><column index="4" value="70"/><column index="5" value="48"/><column index="6" value="52"/><column index="7" value="107"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="OnlineRetailSales" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="68"/><column index="2" value="73"/><column index="3" value="68"/><column index="4" value="92"/><column index="5" value="163"/><column index="6" value="115"/><column index="7" value="94"/><column index="8" value="81"/><column index="9" value="198"/><column index="10" value="57"/><column index="11" value="62"/><column index="12" value="62"/><column index="13" value="78"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="SpeakerInfo" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="128"/><column index="2" value="202"/><column index="3" value="156"/><column index="4" value="300"/><column index="5" value="300"/><column index="6" value="300"/><column index="7" value="191"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">/*
+Created by: Jacob Taylor
+Created on: 01/19/24
+The following is an example of a query using a scalar subquery, as discussed in video 01.02.
+Task: Write a query that uses a scalar subquery to identify orders whose Order Total is higher than the average total price of all other orders.
+*/
+
+SELECT *,
+	(SELECT avg(OrderTotal) 
+	FROM OnlineRetailSales) AS AverageTotal
+FROM OnlineRetailSales
+WHERE OrderTotal &gt;= AverageTotal
+
+/*
+Created by: Jacob Taylor
+Created on: 01/19/24
+The following is an example of a query using a multiple-row subquery, as discussed in videos 01.03 and 01.04.
+Task: Two Trees Olive Oil wants to know the session name, start date, end date, and room that their employees will be delivering their presentations in.
+Write a query that uses a multiple-row subquery to extract this information.
+
+Preview data if necessary:
+SELECT * FROM ConferenceSessionInfo
+SELECT * FROM SpeakerInfo
+*/
+
+SELECT SpeakerName,
+				SessionName,
+				StartDate,
+				EndDate,
+				RoomName
+FROM ConferenceSessionInfo
+WHERE SpeakerName IN 
+	(SELECT Name 
+	FROM SpeakerInfo
+	WHERE Organization IS 'Two Trees Olive Oil')
+
+--Also possible with an INNER JOIN
+
+SELECT SpeakerName,
+				SessionName,
+				StartDate,
+				EndDate,
+				RoomName
+FROM ConferenceSessionInfo AS csi
+INNER JOIN 
+	(SELECT Name
+	FROM SpeakerInfo
+	WHERE Organization IS 'Two Trees Olive Oil') AS si
+ON csi.SpeakerName = si.Name
+	
+/*
+Created by: Jacob Taylor
+Created on: 01/19/24
+The following is an example of a query using a correlated subquery, as discussed in video 01.05.
+Task: Write a query that outputs the first and last name, state, email address, and phone number of conference attendees who come from states that have no online retail sales.
+Write a query that uses a multiple-row subquery to extract this information.
+
+Preview data if necessary:
+SELECT * FROM OnlineRetailSales
+SELECT * FROM ConventionAttendees
+*/
+
+SELECT FirstName,
+				LastName,
+				State,
+				Email,
+				PhoneNumber
+FROM ConventionAttendees AS ca
+WHERE State NOT IN 
+	(SELECT CustState
+	FROM OnlineRetailSales AS o
+	WHERE ca.State = o.CustState)
+	
+/*
+Created by: Jacob Taylor
+Created on: 01/22/24
+The following is my solution to the Challenge: Subqueries 01.06.
+Task: Write a querey using a subquery that returns product category, product number, product name, and units in stock 
+from the Inventory table where items have less than the average amount of products left in stock.
+
+Preview data if necessary:
+SELECT * FROM Inventory
+*/
+
+SELECT ProdCategory,
+				ProdNumber,
+				ProdName,
+				InStock,
+	(SELECT avg(InStock) 
+	FROM Inventory) AS AverageInStock
+FROM Inventory
+WHERE InStock &lt; AverageInStock
+
+/*
+Created by: Jacob Taylor
+Created on: 01/23/24
+The following is an example of  a query using non-recursive Common Table Expressions (CTE), as discussed in video 02.01.
+Task: Re-write the query from video 01.02 that uses a CTE instead of a subquery to yield the same results.
+The query identifies orders whose order total is higher than the average total price of all other orders.
+
+Preview data if necessary:
+SELECT * FROM OnlineRetailSales
+*/
+
+WITH AverageTotal (Average) AS 
+	(SELECT avg(OrderTotal) AS Average
+	FROM OnlineRetailSales)
+SELECT *
+FROM OnlineRetailSales,
+			AverageTotal
+WHERE	OrderTotal &gt;= Average
+
+/*
+Created by: Jacob Taylor
+Creaetd on: 01/23/24
+The following is an example of a Recursive CTE, as discussed in video 02.02.
+Task: Write a query that uses a Recursive CTE to return the count of direct reports that Gran Nguyen has.
+
+Preview data if necessary:
+SELECT * FROM EmployeeDirectory
+*/
+
+WITH  DirectReports AS 
+	(SELECT EmployeeID,
+						FirstName, 
+						LastName, 
+						Manager
+	FROM EmployeeDirectory
+	WHERE EmployeeID = 42
+	UNION ALL 
+	SELECT e.EmployeeID, 
+						e.FirstName, 
+						e.LastName, 
+						e.Manager
+	FROM EmployeeDirectory AS e
+	INNER JOIN DirectReports AS d
+	ON e.Manager = d.EmployeeID)
+SELECT count(*) AS DirectReport
+FROM DirectReports AS d
+WHERE d.EmployeeID != 42
+
+/*
+Created by: Jacob Taylor
+Created on: 01/24/24
+The following is my solution to the Challenge: CTEs 02.03.
+Task: Write a query that uses a CTE to return the product category, product number, product name, and in stock 
+from the Inventory table where items have less than the average amount of products left in stock.
+
+Preview data if necessary:
+SELECT * FROM Inventory
+*/
+
+WITH LowStock (Stock) AS 
+	(SELECT avg(InStock) AS Stock
+	FROM Inventory)
+SELECT ProdCategory,
+				ProdNumber,
+				ProdName,
+				Instock
+FROM Inventory,
+			LowStock
+WHERE InStock &lt; Stock
+	
+/*
+Created by: Jacob Taylor
+Created on: 01/24/24
+The following is an example of a query using ROW_NUMBER, as discussed in video 03.02.
+Task: Write a query using ROW_NUMBER to return each customer's most recent order.
+
+Preview data if necessary:
+SELECT * FROM OnlineRetailSales
+*/
+
+--Below gives us a count of distinct orders from each customer.
+SELECT CustName,
+				count(DISTINCT OrderNum)
+FROM OnlineRetailSales
+GROUP BY CustName
+	
+--Below is the CTE statement that we will use for our full query.
+SELECT OrderNum,
+				OrderDate,
+				CustName,
+				ProdName,
+				Quantity,
+				row_number() OVER 
+					(PARTITION BY CustName 
+					ORDER BY OrderDate DESC) AS RowNum
+FROM OnlineRetailSales
+
+--Below is the full query for this task.
+WITH RowNumbers AS 
+	(SELECT OrderNum, 
+						OrderDate, 
+						CustName, 
+						ProdName, 
+						Quantity, 
+						row_number() OVER 
+							(PARTITION BY CustName 
+							ORDER BY OrderDate DESC) AS RowNum
+							FROM OnlineRetailSales)
+SELECT *
+FROM RowNumbers
+WHERE RowNum = 1
+
+/*
+Created by: Jacob Taylor
+Created on: 01/24/24
+The following is my solution to the Challenge: row_number 03.03
+Task: Write a query using row_number() that returns the order number, order date, customer name, product category, product name, and order total
+that returns the three orders with the highest order totals from each product category purchased by Boehm Inc.
+
+Preview data if necessary:
+SELECT *  FROM OnlineRetailSales WHERE CustName IS 'Boehm Inc.'
+*/
+
+WITH HighestOrderTotal AS 
+	(SELECT OrderNum, 
+						OrderDate, 
+						CustName, 
+						ProdCategory, 
+						ProdName, 
+						OrderTotal, 
+						row_number() OVER 
+							(PARTITION BY ProdCategory
+							ORDER BY OrderTotal DESC) AS HighestTotals
+	FROM OnlineRetailSales
+	WHERE CustName IS 'Boehm Inc.')
+SELECT OrderNum,
+					OrderDate,
+					CustName,
+					ProdCategory,
+					OrderTotal
+FROM HighestOrderTotal
+WHERE HighestTotals IN (1, 2, 3)
+ORDER BY ProdCategory,
+						OrderTotal DESC
+
+/*
+Created by: Jacob Taylor
+Created on: 01/24/24
+The following is an example of a query using lag() and lead(), as discussed in video 04.02.
+Task: Write a query using lag() and lead() to show the session name and start time of the previous Red30Tech session conducted in Room 102,
+as well as what the next session will be. 
+
+Preview data if necessary:
+SELECT * FROM ConferenceSessionInfo WHERE RoomName = 'Room 102' ORDER BY StartDate ASC
+*/
+
+SELECT StartDate,
+				EndDate, 
+				SessionName, 
+				lag(SessionName,1) OVER 
+					(ORDER BY StartDate ASC) AS PreviousSession,
+				lag(StartDate,1) OVER 
+					(ORDER BY StartDate ASC) AS PreviousSessionStartTime,
+				lead(SessionName,1) 
+					OVER (ORDER BY StartDate ASC) AS NextSession,
+				lead(StartDate,1) OVER 
+					(ORDER BY StartDate ASC) AS NextSessionStartTime
+FROM ConferenceSessionInfo
+WHERE RoomName IS 'Room 102'
+
+/*
+Created by: Jacob Taylor
+Created on: 01/24/24
+The following is my solution to Challenge: lag() and lead() 04.03.
+Task: Write a query using lag() or lead() that returns order quantity by date and shows quantites from the last five order dates 
+for each drone order.
+
+Preview data if necessary:
+SELECT * FROM OnlineRetailSales WHERE ProdCategory IS 'Drones' 
+*/
+
+WITH OrdersByDays AS
+	(SELECT OrderDate, sum(Quantity) AS QuantityByDay
+	FROM OnlineRetailSales
+	WHERE ProdCategory = 'Drones'
+	GROUP BY OrderDate)
+SELECT
+	OrderDate,
+	QuantityByDay,
+	lag(QuantityByDay, 1) OVER
+		(ORDER BY OrderDate ASC) AS LastDateQuantity_1,
+	lag(QuantityByDay, 2) OVER
+		(ORDER BY OrderDate ASC) AS LastDateQuantity_2,
+	lag(QuantityByDay, 3) OVER
+		(ORDER BY OrderDate ASC) AS LastDateQuantity_3,
+	lag(QuantityByDay, 4) OVER
+		(ORDER BY OrderDate ASC) AS LastDateQuantity_4,
+	lag(QuantityByDay, 5) OVER
+		(ORDER BY OrderDate ASC) AS LastDateQuantity_5
+FROM OrdersByDays
+	
+/*
+Created by: Jacob Taylor
+Created on: 01/25/24
+The following is an example of a query using rank() and dense_rank(), as discussed in video 05.02.
+Task: Write a query using rank() and dense_rank() that ranks employees in alphabetical order by their last name.
+
+Preview data if necessary:
+SELECT * FROM EmployeeDirectory
+*/
+
+SELECT *,
+				rank() OVER
+					(ORDER BY LastName ASC) AS Ranking,
+				dense_rank() OVER
+					(ORDER BY LastName ASC) AS DenseRanking
+FROM EmployeeDirectory
+	
+/*
+Created by: Jacob Taylor
+Created on: 01/25/24
+The following is my solution to Challenge: rank() and dense_rank() 05.03.
+Task: Write a query using rank() or dense_rank() that returns the registration information for 
+the first three conference attendees that registered from each state
+
+Preview data if necessary:
+SELECT * FROM ConventionAttendees
+*/
+
+--Results in 229 rows when using dense_rank().
+WITH TopThree AS
+	(SELECT *,
+						dense_rank() OVER 
+							(PARTITION BY State
+							ORDER BY RegistrationDate) AS DenseRanking
+	FROM ConventionAttendees)
+SELECT *
+FROM TopThree
+WHERE DenseRanking IN (1, 2, 3)
+
+--Results in 171 rows when using rank().
+WITH TopThree AS
+	(SELECT *,
+						rank() OVER 
+							(PARTITION BY State
+							ORDER BY RegistrationDate) AS Ranking
+	FROM ConventionAttendees)
+SELECT *
+FROM TopThree
+WHERE Ranking IN (1, 2, 3)
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
